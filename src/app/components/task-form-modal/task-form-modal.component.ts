@@ -23,14 +23,18 @@ export class TaskFormModalComponent implements OnInit {
 
   ngOnInit(): void {
     this.taskForm = this.formBuilder.group({
+      id: [''],
       task: ['', Validators.required],
       assignedTo: ['', Validators.required],
+      status: ['1'],
     });
 
     if (this.data) {
       this.taskForm.patchValue({
+        id: this.data.id,
         task: this.data.task,
         assignedTo: this.data.assignedTo,
+        status: this.data.status,
       });
     }
   }

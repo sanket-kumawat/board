@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Task } from 'src/app/types/task';
 
 @Component({
@@ -14,7 +14,13 @@ export class CardComponent implements OnInit {
     assignedTo: '',
   };
 
+  @Output() editTask: EventEmitter<Task> = new EventEmitter();
+
   constructor() {}
 
   ngOnInit(): void {}
+
+  onEditTask() {
+    this.editTask.emit(this.cardConfig);
+  }
 }

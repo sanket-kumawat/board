@@ -4,3 +4,7 @@ export type Task = {
   status: string;
   assignedTo: string;
 };
+
+export type ApiResponse = {
+  [key: string]: Task;
+};

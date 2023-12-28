@@ -8,6 +8,8 @@ import { taskStatus } from 'src/app/constants/taskStatus';
 import { Task } from 'src/app/types/task';
 import { MatDialog } from '@angular/material/dialog';
 import { TaskFormModalComponent } from 'src/app/components/task-form-modal/task-form-modal.component';
+import { ApiService } from '../../services/api.service';
+import { map } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
@@ -15,36 +17,37 @@ import { TaskFormModalComponent } from 'src/app/components/task-form-modal/task-
   styleUrls: ['./dashboard.component.scss'],
 })
 export class DashboardComponent implements OnInit {
-  taskList: Task[] = [
-    { id: '1', task: 'abcd', status: '1', assignedTo: 'Sanket1' },
-    { id: '2', task: 'efgh', status: '2', assignedTo: 'Sanket2' },
-    { id: '3', task: 'jklm', status: '3', assignedTo: 'Sanket3' },
-    { id: '4', task: 'nopq', status: '4', assignedTo: 'Sanket4' },
-  ];
-  toDoList: Task[] = [
-    { id: '1', task: 'abcd', status: '1', assignedTo: 'Sanket1' },
-    { id: '1', task: 'abcd', status: '1', assignedTo: 'Sanket1' },
-    { id: '1', task: 'abcd', status: '1', assignedTo: 'Sanket1' },
-  ];
-  inProgressList: Task[] = [
-    { id: '2', task: 'efgh', status: '2', assignedTo: 'Sanket2' },
-    { id: '2', task: 'efgh', status: '2', assignedTo: 'Sanket2' },
-    { id: '2', task: 'efgh', status: '2', assignedTo: 'Sanket2' },
-  ];
-  inReviewList: Task[] = [
-    { id: '3', task: 'jklm', status: '3', assignedTo: 'Sanket3' },
-    { id: '3', task: 'jklm', status: '3', assignedTo: 'Sanket3' },
-  ];
-  doneList: Task[] = [
-    { id: '4', task: 'nopq', status: '4', assignedTo: 'Sanket4' },
-    { id: '4', task: 'nopq', status: '4', assignedTo: 'Sanket4' },
-  ];
+  toDoList: Task[] = [];
+  inProgressList: Task[] = [];
+  inReviewList: Task[] = [];
+  doneList: Task[] = [];
 
   taskStatus = taskStatus;
 
-  constructor(public dialog: MatDialog) {}
+  constructor(public dialog: MatDialog, private apiService: ApiService) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.getTaskList();
+  }
+
+  getTaskList() {
+    this.apiService
+      .getTaskList()
+      .pipe(
+        map((responseData) => {
+          const taskArray = [];
+          for (const key in responseData) {
+            if (responseData.hasOwnProperty(key)) {
+              taskArray.push({ ...responseData[key], id: key });
+            }
+          }
+          return taskArray;
+        })
+      )
+      .subscribe((response) => {
+        this.filterTaskList(response);
+      });
+  }
 
   drop(event: CdkDragDrop<Task[]>) {
     if (event.previousContainer === event.container) {
@@ -63,16 +66,48 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  openTaskForm() {
-    const dialogRef = this.dialog.open(TaskFormModalComponent, {
+  filterTaskList(taskList: Task[]) {
+    this.toDoList = this.filterTask(taskList, taskStatus.toDo);
+    this.inProgressList = this.filterTask(taskList, taskStatus.inProgress);
+    this.inReviewList = this.filterTask(taskList, taskStatus.inReview);
+    this.doneList = this.filterTask(taskList, taskStatus.done);
+  }
+
+  filterTask(taskList: Task[], status: string) {
+    return taskList.filter((task) => task.status === status);
+  }
+
+  editTask($event: Task) {
+    console.log($event);
+    this.openTaskForm($event);
+  }
+
+  openTaskForm(data?: Task) {
+    let dialogConfig: {
+      width: string;
+      data?: Task;
+    } = {
       width: '300px',
-    });
+    };
+
+    if (data) {
+      dialogConfig = { ...dialogConfig, data: data };
+    }
+
+    const dialogRef = this.dialog.open(TaskFormModalComponent, dialogConfig);
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        console.log(result);
+        if (result.id === '') {
+          this.apiService.createTask(result).subscribe((response) => {
+            response;
+          });
+        } else {
+          this.apiService
+            .updateTask(result)
+            .subscribe((response) => console.log(response));
+        }
       }
-      console.log('The dialog was closed');
     });
   }
 }

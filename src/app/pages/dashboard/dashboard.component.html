@@ -9,7 +9,11 @@
            (cdkDropListDropped)="drop($event)"
            class="task-list">
         <div *ngFor="let item of toDoList"
-             cdkDrag><app-card [cardConfig]="item"></app-card></div>
+             cdkDrag>
+          <app-card [cardConfig]="item"
+                    (editTask)="editTask($event)">
+          </app-card>
+        </div>
       </div>
     </div>
     <div class="task-list-container">
@@ -22,7 +26,11 @@
            class="task-list">
         <div class="example-box"
              *ngFor="let item of inProgressList"
-             cdkDrag><app-card [cardConfig]="item"></app-card></div>
+             cdkDrag>
+          <app-card [cardConfig]="item"
+                    (editTask)="editTask($event)">
+          </app-card>
+        </div>
       </div>
     </div>
     <div class="task-list-container">
@@ -34,7 +42,11 @@
            (cdkDropListDropped)="drop($event)"
            class="task-list">
         <div *ngFor="let item of inReviewList"
-             cdkDrag><app-card [cardConfig]="item"></app-card></div>
+             cdkDrag>
+          <app-card [cardConfig]="item"
+                    (editTask)="editTask($event)">
+          </app-card>
+        </div>
       </div>
     </div>
     <div class="task-list-container">
@@ -46,7 +58,11 @@
            (cdkDropListDropped)="drop($event)"
            class="task-list">
         <div *ngFor="let item of doneList"
-             cdkDrag><app-card [cardConfig]="item"></app-card></div>
+             cdkDrag>
+          <app-card [cardConfig]="item"
+                    (editTask)="editTask($event)">
+          </app-card>
+        </div>
       </div>
     </div>
 
